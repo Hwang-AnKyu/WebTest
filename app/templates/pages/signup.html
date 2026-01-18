@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - AICOM{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[60vh] flex-col justify-center">
+    <div class="mx-auto w-full max-w-md space-y-6">
+        <div class="flex flex-col space-y-2 text-center">
+            <h1 class="text-2xl font-semibold tracking-tight">Create an account</h1>
+            <p class="text-sm text-muted-foreground">Enter your details to get started</p>
+        </div>
+
+        {% if error %}
+        <div class="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/auth/signup/form" method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none" for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="you@example.com"
+                >
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none" for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    pattern="[a-zA-Z0-9_]+"
+                    minlength="2"
+                    maxlength="50"
+                    class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="username"
+                >
+                <p class="text-xs text-muted-foreground">Letters, numbers, and underscores only</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none" for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    minlength="8"
+                    class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="At least 8 characters"
+                >
+                <p class="text-xs text-muted-foreground">Must contain at least one letter and one number</p>
+            </div>
+
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 w-full"
+            >
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-muted-foreground">
+            Already have an account?
+            <a href="/auth/login" class="underline underline-offset-4 hover:text-primary" hx-get="/auth/login" hx-target="body" hx-push-url="true">
+                Login
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}

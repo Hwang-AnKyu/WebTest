@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ board.name }} - AICOM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Board Header -->
+    <div class="flex items-center justify-between">
+        <div class="space-y-1">
+            <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
+                {% if board.icon %}
+                <span>{{ board.icon }}</span>
+                {% endif %}
+                {{ board.name }}
+            </h1>
+            {% if board.description %}
+            <p class="text-muted-foreground">{{ board.description }}</p>
+            {% endif %}
+        </div>
+
+        {% if can_write %}
+        <a
+            href="/boards/{{ board.id }}/posts/create"
+            hx-get="/boards/{{ board.id }}/posts/create"
+            hx-target="body"
+            hx-push-url="true"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4"
+        >
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Write Post
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Posts Table -->
+    <div class="rounded-lg border">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b bg-muted/50">
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-full">Title</th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Author</th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Views</th>
+                        <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                        <td class="p-4 align-middle">
+                            <a
+                                href="/posts/{{ post.id }}"
+                                hx-get="/posts/{{ post.id }}"
+                                hx-target="body"
+                                hx-push-url="true"
+                                class="flex items-center gap-2 hover:underline"
+                            >
+                                {% if post.is_pinned %}
+                                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground">
+                                    Pinned
+                                </span>
+                                {% endif %}
+                                <span class="font-medium">{{ post.title }}</span>
+                            </a>
+                        </td>
+                        <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                            {{ post.author.username if post.author else 'Unknown' }}
+                        </td>
+                        <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                            {{ post.view_count }}
+                        </td>
+                        <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                            {{ post.created_at[:10] }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-muted-foreground">
+                            No posts yet. Be the first to write!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.total_pages > 1 %}
+    <nav class="flex items-center justify-center space-x-2">
+        {% if pagination.has_prev %}
+        <a
+            href="/boards/{{ board.id }}?page={{ pagination.page - 1 }}"
+            hx-get="/boards/{{ board.id }}?page={{ pagination.page - 1 }}"
+            hx-target="body"
+            hx-push-url="true"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4"
+        >
+            Previous
+        </a>
+        {% endif %}
+
+        {% for p in pagination.page_range %}
+        <a
+            href="/boards/{{ board.id }}?page={{ p }}"
+            hx-get="/boards/{{ board.id }}?page={{ p }}"
+            hx-target="body"
+            hx-push-url="true"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background h-10 w-10 {% if p == pagination.page %}bg-primary text-primary-foreground{% else %}border border-input hover:bg-accent hover:text-accent-foreground{% endif %}"
+        >
+            {{ p }}
+        </a>
+        {% endfor %}
+
+        {% if pagination.has_next %}
+        <a
+            href="/boards/{{ board.id }}?page={{ pagination.page + 1 }}"
+            hx-get="/boards/{{ board.id }}?page={{ pagination.page + 1 }}"
+            hx-target="body"
+            hx-push-url="true"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent hover:text-accent-foreground h-10 px-4"
+        >
+            Next
+        </a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

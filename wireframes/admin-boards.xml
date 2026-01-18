@@ -1,0 +1,52 @@
+<page path="/admin/boards">
+    <header></header>
+    
+    <title>게시판 관리</title>
+    
+    <actions>
+        <button onclick="showCreateForm()">새 게시판 생성</button>
+    </actions>
+    
+    <!-- 게시판 생성 폼 (숨김 상태) -->
+    <form id="createForm" action="/admin/boards" method="post" hidden>
+        <title>새 게시판 생성</title>
+        <input type="text" label="게시판 이름" required />
+        <textarea label="게시판 설명"></textarea>
+        <select label="권한 설정" required>
+            <option value="all">모든 사용자 읽기/쓰기</option>
+            <option value="member">회원만 쓰기 가능</option>
+            <option value="admin">관리자만 쓰기 가능</option>
+        </select>
+        <input type="number" label="정렬 순서" value="0" />
+        <button type="submit">생성</button>
+        <button type="button" onclick="hideCreateForm()">취소</button>
+    </form>
+    
+    <table>
+        <thead>
+            <th>ID</th>
+            <th>게시판명</th>
+            <th>설명</th>
+            <th>권한</th>
+            <th>순서</th>
+            <th>생성일</th>
+            <th>작업</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{id}</td>
+                <td>{name}</td>
+                <td>{description}</td>
+                <td>{permission}</td>
+                <td>{order_num}</td>
+                <td>{created_at}</td>
+                <td>
+                    <button onclick="editBoard({id})">수정</button>
+                    <button onclick="deleteBoard({id})">삭제</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <footer></footer>
+</page>

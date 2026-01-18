@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - AICOM{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-muted-foreground">
+        <a href="/" class="hover:text-foreground" hx-get="/" hx-target="body" hx-push-url="true">Home</a>
+        <span>/</span>
+        <a href="/boards/{{ board.id }}" class="hover:text-foreground" hx-get="/boards/{{ board.id }}" hx-target="body" hx-push-url="true">{{ board.name }}</a>
+        <span>/</span>
+        <span class="text-foreground truncate max-w-xs">{{ post.title }}</span>
+    </nav>
+
+    <!-- Post Header -->
+    <div class="space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
+                {% if post.is_pinned %}
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold border-transparent bg-primary text-primary-foreground">
+                    Pinned
+                </span>
+                {% endif %}
+                {{ post.title }}
+            </h1>
+
+            <div class="flex items-center gap-2">
+                <!-- Bookmark Button -->
+                {% if user %}
+                <div id="bookmark-btn">
+                    {% include 'components/bookmark-button.html' %}
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                {% if can_edit %}
+                <a
+                    href="/posts/{{ post.id }}/edit"
+                    hx-get="/posts/{{ post.id }}/edit"
+                    hx-target="body"
+                    hx-push-url="true"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-input hover:bg-accent h-9 px-3"
+                >
+                    Edit
+                </a>
+                <form action="/posts/{{ post.id }}/delete" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this post?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button
+                        type="submit"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-destructive text-destructive hover:bg-destructive/10 h-9 px-3"
+                    >
+                        Delete
+                    </button>
+                </form>
+                {% endif %}
+
+                {% if can_pin %}
+                <button
+                    onclick="togglePin('{{ post.id }}')"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-input hover:bg-accent h-9 px-3"
+                >
+                    {{ 'Unpin' if post.is_pinned else 'Pin' }}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Post Meta -->
+        <div class="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>By <strong>{{ post.author.username if post.author else 'Unknown' }}</strong></span>
+            <span>{{ post.created_at[:10] }}</span>
+            <span>{{ post.view_count }} views</span>
+        </div>
+    </div>
+
+    <!-- Post Content -->
+    <div class="prose prose-neutral max-w-none border rounded-lg p-6 bg-card">
+        {{ post.content | safe if post.content else '<p class="text-muted-foreground">No content.</p>' | safe }}
+    </div>
+
+    <!-- Comments Section -->
+    <div class="space-y-6" id="comments-section">
+        <h2 class="text-xl font-semibold">Comments</h2>
+
+        <!-- Comment Form -->
+        {% if user %}
+        <form
+            action="/posts/{{ post.id }}/comments/form"
+            method="POST"
+            hx-post="/posts/{{ post.id }}/comments/form"
+            hx-target="#comments-list"
+            hx-swap="afterbegin"
+            hx-on::after-request="this.reset()"
+            class="space-y-3"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <textarea
+                name="content"
+                required
+                rows="3"
+                class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Write a comment..."
+            ></textarea>
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4"
+            >
+                Post Comment
+            </button>
+        </form>
+        {% else %}
+        <p class="text-muted-foreground">
+            <a href="/auth/login" class="underline hover:text-foreground">Login</a> to post a comment.
+        </p>
+        {% endif %}
+
+        <!-- Comments List -->
+        <div id="comments-list" class="space-y-4">
+            {% for comment in comments %}
+                {% include 'components/comment-item.html' %}
+            {% else %}
+            <p class="text-center text-muted-foreground py-8">No comments yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function togglePin(postId) {
+    const csrfToken = getCookie('csrf_token');
+    try {
+        const response = await fetch(`/posts/${postId}/pin`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-Token': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (response.ok) {
+            location.reload();
+        } else {
+            showToast('Failed to toggle pin status', 'error');
+        }
+    } catch (error) {
+        showToast('Failed to toggle pin status', 'error');
+    }
+}
+</script>
+{% endblock %}

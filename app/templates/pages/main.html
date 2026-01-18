@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}AICOM - Community{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Hero Section -->
+    <div class="text-center space-y-4">
+        <h1 class="text-4xl font-bold tracking-tight">Welcome to AICOM</h1>
+        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+            A community platform for sharing ideas and discussions.
+        </p>
+    </div>
+
+    <!-- Boards Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for board in boards %}
+        <a href="/boards/{{ board.id }}"
+           hx-get="/boards/{{ board.id }}"
+           hx-target="body"
+           hx-push-url="true"
+           class="group relative rounded-lg border p-6 hover:border-foreground/50 transition-colors">
+            <div class="flex items-center gap-3 mb-3">
+                {% if board.icon %}
+                <span class="text-2xl">{{ board.icon }}</span>
+                {% else %}
+                <svg class="h-6 w-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                {% endif %}
+                <h3 class="font-semibold text-lg">{{ board.name }}</h3>
+            </div>
+            {% if board.description %}
+            <p class="text-sm text-muted-foreground line-clamp-2">{{ board.description }}</p>
+            {% endif %}
+            <div class="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                <span class="flex items-center gap-1">
+                    {% if board.can_write == 'all' %}
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Public
+                    {% elif board.can_write == 'member' %}
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Members Only
+                    {% else %}
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Admin Only
+                    {% endif %}
+                </span>
+            </div>
+        </a>
+        {% else %}
+        <div class="col-span-full text-center py-12 text-muted-foreground">
+            <p>No boards available yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

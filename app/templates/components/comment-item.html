@@ -1,0 +1,159 @@
+<div class="{% if comment.parent_id %}comment-reply{% endif %}" id="comment-{{ comment.id }}">
+    <div class="border rounded-lg p-4 space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm">
+                <span class="font-medium">{{ comment.author.username if comment.author else 'Unknown' }}</span>
+                <span class="text-muted-foreground">{{ comment.created_at[:16] }}</span>
+                {% if comment.updated_at != comment.created_at %}
+                <span class="text-muted-foreground text-xs">(edited)</span>
+                {% endif %}
+            </div>
+
+            {% if user and (comment.user_id == user.id or user.is_admin) %}
+            <div class="flex items-center gap-2">
+                <button
+                    onclick="showEditForm('{{ comment.id }}')"
+                    class="text-xs text-muted-foreground hover:text-foreground"
+                >
+                    Edit
+                </button>
+                <form
+                    action="/comments/{{ comment.id }}/delete"
+                    method="POST"
+                    hx-post="/comments/{{ comment.id }}/delete"
+                    hx-target="#comment-{{ comment.id }}"
+                    hx-swap="outerHTML"
+                    class="inline"
+                >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button
+                        type="submit"
+                        class="text-xs text-destructive hover:underline"
+                        onclick="return confirm('Delete this comment?')"
+                    >
+                        Delete
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Content Display -->
+        <div id="comment-content-{{ comment.id }}">
+            <p class="text-sm whitespace-pre-wrap">{{ comment.content }}</p>
+        </div>
+
+        <!-- Edit Form (hidden by default) -->
+        <form
+            id="edit-form-{{ comment.id }}"
+            action="/comments/{{ comment.id }}/form"
+            method="POST"
+            hx-post="/comments/{{ comment.id }}/form"
+            hx-target="#comment-{{ comment.id }}"
+            hx-swap="outerHTML"
+            class="hidden space-y-2"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <textarea
+                name="content"
+                required
+                rows="2"
+                class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >{{ comment.content }}</textarea>
+            <div class="flex gap-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
+                >
+                    Save
+                </button>
+                <button
+                    type="button"
+                    onclick="hideEditForm('{{ comment.id }}')"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input hover:bg-accent h-8 px-3"
+                >
+                    Cancel
+                </button>
+            </div>
+        </form>
+
+        <!-- Reply button (only for root comments) -->
+        {% if not comment.parent_id and user %}
+        <button
+            onclick="showReplyForm('{{ comment.id }}')"
+            class="text-xs text-muted-foreground hover:text-foreground"
+        >
+            Reply
+        </button>
+
+        <!-- Reply Form (hidden by default) -->
+        <form
+            id="reply-form-{{ comment.id }}"
+            action="/posts/{{ comment.post_id }}/comments/form"
+            method="POST"
+            hx-post="/posts/{{ comment.post_id }}/comments/form"
+            hx-target="#comment-{{ comment.id }} .replies-container"
+            hx-swap="afterbegin"
+            hx-on::after-request="hideReplyForm('{{ comment.id }}')"
+            class="hidden space-y-2 mt-3"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+            <textarea
+                name="content"
+                required
+                rows="2"
+                class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Write a reply..."
+            ></textarea>
+            <div class="flex gap-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3"
+                >
+                    Post Reply
+                </button>
+                <button
+                    type="button"
+                    onclick="hideReplyForm('{{ comment.id }}')"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input hover:bg-accent h-8 px-3"
+                >
+                    Cancel
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Replies Container -->
+    {% if not comment.parent_id %}
+    <div class="replies-container space-y-2 mt-2">
+        {% for reply in comment.replies %}
+            {% set comment = reply %}
+            {% include 'components/comment-item.html' %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function showEditForm(commentId) {
+    document.getElementById('comment-content-' + commentId).classList.add('hidden');
+    document.getElementById('edit-form-' + commentId).classList.remove('hidden');
+}
+
+function hideEditForm(commentId) {
+    document.getElementById('comment-content-' + commentId).classList.remove('hidden');
+    document.getElementById('edit-form-' + commentId).classList.add('hidden');
+}
+
+function showReplyForm(commentId) {
+    document.getElementById('reply-form-' + commentId).classList.remove('hidden');
+}
+
+function hideReplyForm(commentId) {
+    const form = document.getElementById('reply-form-' + commentId);
+    form.classList.add('hidden');
+    form.reset();
+}
+</script>

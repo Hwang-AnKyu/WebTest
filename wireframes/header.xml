@@ -1,0 +1,18 @@
+<header>
+    <left>
+        <link href="/">AICOM</link>
+    </left>
+    <right>
+        <!-- 비로그인 상태 -->
+        <guest>
+            <button href="/auth/login">로그인</button>
+            <button href="/auth/signup">회원가입</button>
+        </guest>
+        
+        <!-- 로그인 상태 -->
+        <user>
+            <username>{사용자명}</username>
+            <button href="/auth/logout">로그아웃</button>
+        </user>
+    </right>
+</header>

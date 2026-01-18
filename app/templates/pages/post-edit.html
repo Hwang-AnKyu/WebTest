@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Post - AICOM{% endblock %}
+
+{% block head_extra %}
+<!-- Quill Editor CSS -->
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-muted-foreground">
+        <a href="/" class="hover:text-foreground" hx-get="/" hx-target="body" hx-push-url="true">Home</a>
+        <span>/</span>
+        <a href="/boards/{{ board.id }}" class="hover:text-foreground" hx-get="/boards/{{ board.id }}" hx-target="body" hx-push-url="true">{{ board.name }}</a>
+        <span>/</span>
+        <a href="/posts/{{ post.id }}" class="hover:text-foreground" hx-get="/posts/{{ post.id }}" hx-target="body" hx-push-url="true">{{ post.title }}</a>
+        <span>/</span>
+        <span class="text-foreground">Edit</span>
+    </nav>
+
+    <div class="space-y-2">
+        <h1 class="text-2xl font-bold tracking-tight">Edit Post</h1>
+        <p class="text-muted-foreground">Make changes to your post.</p>
+    </div>
+
+    {% if error %}
+    <div class="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form action="/posts/{{ post.id }}/form" method="POST" id="post-form" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="content" id="content-input">
+
+        <div class="space-y-2">
+            <label class="text-sm font-medium" for="title">Title</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                maxlength="255"
+                value="{{ post.title }}"
+                class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Enter post title"
+            >
+        </div>
+
+        <div class="space-y-2">
+            <label class="text-sm font-medium">Content</label>
+            <div id="editor" class="border rounded-md min-h-[300px] bg-white"></div>
+            <p class="text-xs text-muted-foreground">
+                <span id="content-size">0</span> / 1MB
+            </p>
+        </div>
+
+        <div class="flex gap-4">
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4"
+            >
+                Save Changes
+            </button>
+            <a
+                href="/posts/{{ post.id }}"
+                hx-get="/posts/{{ post.id }}"
+                hx-target="body"
+                hx-push-url="true"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-input hover:bg-accent h-10 px-4"
+            >
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+    const quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['link', 'image'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        },
+        placeholder: 'Write your post content here...'
+    });
+
+    // Set existing content
+    {% if post.content %}
+    quill.root.innerHTML = {{ post.content | tojson | safe }};
+    {% endif %}
+
+    // Update hidden input before submit
+    document.getElementById('post-form').addEventListener('submit', function(e) {
+        const content = quill.root.innerHTML;
+        const size = new Blob([content]).size;
+
+        if (size > 1048576) {
+            e.preventDefault();
+            alert('Content exceeds 1MB limit. Please reduce the content size.');
+            return false;
+        }
+
+        document.getElementById('content-input').value = content;
+    });
+
+    // Update content size display
+    quill.on('text-change', function() {
+        const content = quill.root.innerHTML;
+        const size = new Blob([content]).size;
+        const sizeText = size < 1024 ? size + ' B' :
+                        size < 1048576 ? (size / 1024).toFixed(1) + ' KB' :
+                        (size / 1048576).toFixed(2) + ' MB';
+        document.getElementById('content-size').textContent = sizeText;
+    });
+
+    // Initial size calculation
+    quill.root.dispatchEvent(new Event('text-change'));
+</script>
+{% endblock %}

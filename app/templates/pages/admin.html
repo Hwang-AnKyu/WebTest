@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - AICOM{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="space-y-2">
+        <h1 class="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+        <p class="text-muted-foreground">Manage boards, users, and site settings.</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="border rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-muted-foreground">Total Boards</p>
+                    <p class="text-3xl font-bold">{{ boards | length }}</p>
+                </div>
+                <svg class="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="border rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-muted-foreground">Total Users</p>
+                    <p class="text-3xl font-bold">{{ users | length }}</p>
+                </div>
+                <svg class="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="border rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-muted-foreground">Active Boards</p>
+                    <p class="text-3xl font-bold">{{ boards | selectattr('is_active') | list | length }}</p>
+                </div>
+                <svg class="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a
+            href="/admin/boards"
+            hx-get="/admin/boards"
+            hx-target="body"
+            hx-push-url="true"
+            class="border rounded-lg p-6 hover:border-foreground/50 transition-colors group"
+        >
+            <div class="flex items-center gap-4">
+                <div class="rounded-lg bg-muted p-3">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold group-hover:underline">Board Management</h3>
+                    <p class="text-sm text-muted-foreground">Create, edit, and delete boards</p>
+                </div>
+            </div>
+        </a>
+
+        <a
+            href="/admin/users"
+            hx-get="/admin/users"
+            hx-target="body"
+            hx-push-url="true"
+            class="border rounded-lg p-6 hover:border-foreground/50 transition-colors group"
+        >
+            <div class="flex items-center gap-4">
+                <div class="rounded-lg bg-muted p-3">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold group-hover:underline">User Management</h3>
+                    <p class="text-sm text-muted-foreground">Manage user permissions</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Recent Boards -->
+    <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Boards Overview</h2>
+        <div class="border rounded-lg">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b bg-muted/50">
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Slug</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Write</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for board in boards %}
+                        <tr class="border-b transition-colors hover:bg-muted/50">
+                            <td class="p-4 align-middle font-medium">{{ board.name }}</td>
+                            <td class="p-4 align-middle text-muted-foreground">{{ board.slug }}</td>
+                            <td class="p-4 align-middle">
+                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium {% if board.can_write == 'admin' %}bg-red-100 text-red-700{% elif board.can_write == 'member' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                    {{ board.can_write }}
+                                </span>
+                            </td>
+                            <td class="p-4 align-middle">
+                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium {% if board.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-700{% endif %}">
+                                    {{ 'Active' if board.is_active else 'Inactive' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

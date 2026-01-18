@@ -1,0 +1,43 @@
+<page path="/admin/users">
+    <header></header>
+    
+    <title>사용자 관리</title>
+    
+    <search>
+        <input type="text" placeholder="이메일 또는 사용자명으로 검색" />
+        <button>검색</button>
+    </search>
+    
+    <table>
+        <thead>
+            <th>ID</th>
+            <th>이메일</th>
+            <th>사용자명</th>
+            <th>관리자 권한</th>
+            <th>가입일</th>
+            <th>작업</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{user_id}</td>
+                <td>{email}</td>
+                <td>{username}</td>
+                <td>
+                    <checkbox checked="{is_admin}" />
+                </td>
+                <td>{created_at}</td>
+                <td>
+                    <button onclick="toggleAdmin({user_id})">권한 변경</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <pagination>
+        <prev>이전</prev>
+        <numbers>1 2 3 4 5</numbers>
+        <next>다음</next>
+    </pagination>
+    
+    <footer></footer>
+</page>

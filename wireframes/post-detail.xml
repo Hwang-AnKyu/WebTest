@@ -1,0 +1,58 @@
+<page path="/posts/{post_id}">
+    <header></header>
+    
+    <article>
+        <title>{게시글 제목}</title>
+        <meta>
+            <author>{작성자}</author>
+            <date>{작성일시}</date>
+            <views>조회수: {조회수}</views>
+        </meta>
+        
+        <content>
+            <!-- Quill.js로 작성된 HTML 내용 -->
+            {게시글 내용}
+        </content>
+        
+        <actions>
+            <button href="/posts/{post_id}/edit">수정</button>
+            <button href="/posts/{post_id}/delete">삭제</button>
+        </actions>
+    </article>
+    
+    <comments>
+        <title>댓글</title>
+        <form action="/posts/{post_id}/comments" method="post">
+            <textarea label="댓글 작성" required></textarea>
+            <button type="submit">댓글 등록</button>
+        </form>
+        
+        <list>
+            <comment>
+                <author>{댓글 작성자}</author>
+                <date>{작성일시}</date>
+                <content>{댓글 내용}</content>
+                <actions>
+                    <button>답글</button>
+                    <button>수정</button>
+                    <button>삭제</button>
+                </actions>
+                
+                <!-- 대댓글 -->
+                <replies>
+                    <comment class="reply">
+                        <author>{답글 작성자}</author>
+                        <date>{작성일시}</date>
+                        <content>{답글 내용}</content>
+                        <actions>
+                            <button>수정</button>
+                            <button>삭제</button>
+                        </actions>
+                    </comment>
+                </replies>
+            </comment>
+        </list>
+    </comments>
+    
+    <footer></footer>
+</page>

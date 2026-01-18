@@ -1,0 +1,25 @@
+<page path="/posts/{post_id}/edit">
+    <header></header>
+    
+    <form action="/posts/{post_id}" method="put">
+        <title>게시글 수정</title>
+        <board>{게시판명}</board>
+        
+        <input type="text" label="제목" value="{기존 제목}" required />
+        
+        <editor type="quill" label="내용" value="{기존 내용}" required>
+            <!-- Quill.js 에디터 -->
+        </editor>
+        
+        <info>
+            * 이미지는 Base64로 변환되어 저장됩니다. (전체 게시글 1MB 제한)
+        </info>
+        
+        <actions>
+            <button type="submit">수정</button>
+            <button type="button" href="/posts/{post_id}">취소</button>
+        </actions>
+    </form>
+    
+    <footer></footer>
+</page>

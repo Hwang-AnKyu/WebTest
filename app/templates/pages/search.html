@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Search - AICOM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="space-y-2">
+        <h1 class="text-2xl font-bold tracking-tight">Search</h1>
+        <p class="text-muted-foreground">Find posts across all boards.</p>
+    </div>
+
+    <!-- Search Form -->
+    <form action="/search" method="GET" class="space-y-4">
+        <div class="flex gap-4 flex-wrap">
+            <div class="flex-1 min-w-[200px]">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    required
+                    class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="Enter search term..."
+                >
+            </div>
+
+            <select
+                name="search_type"
+                class="h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+                <option value="all" {% if search_type == 'all' %}selected{% endif %}>Title + Content</option>
+                <option value="title" {% if search_type == 'title' %}selected{% endif %}>Title Only</option>
+                <option value="content" {% if search_type == 'content' %}selected{% endif %}>Content Only</option>
+            </select>
+
+            <select
+                name="board_id"
+                class="h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+                <option value="">All Boards</option>
+                {% for board in boards %}
+                <option value="{{ board.id }}" {% if board_id == board.id %}selected{% endif %}>{{ board.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4"
+            >
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                Search
+            </button>
+        </div>
+    </form>
+
+    <!-- Search Results -->
+    {% if results %}
+    <div class="space-y-4">
+        <p class="text-sm text-muted-foreground">
+            Found <strong>{{ results.total }}</strong> result(s) for "<strong>{{ results.query }}</strong>"
+        </p>
+
+        {% if results.posts %}
+        <div class="rounded-lg border">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b bg-muted/50">
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-full">Title</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Author</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Views</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in results.posts %}
+                        <tr class="border-b transition-colors hover:bg-muted/50">
+                            <td class="p-4 align-middle">
+                                <a
+                                    href="/posts/{{ post.id }}"
+                                    hx-get="/posts/{{ post.id }}"
+                                    hx-target="body"
+                                    hx-push-url="true"
+                                    class="flex items-center gap-2 hover:underline"
+                                >
+                                    <span class="font-medium">{{ post.title }}</span>
+                                </a>
+                            </td>
+                            <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                                {{ post.author.username if post.author else 'Unknown' }}
+                            </td>
+                            <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                                {{ post.view_count }}
+                            </td>
+                            <td class="p-4 align-middle whitespace-nowrap text-muted-foreground">
+                                {{ post.created_at[:10] }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if results.total_pages > 1 %}
+        <nav class="flex items-center justify-center space-x-2">
+            {% if results.has_prev %}
+            <a
+                href="/search?q={{ results.query }}&search_type={{ results.search_type }}&board_id={{ results.board_id or '' }}&page={{ results.page - 1 }}"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-input hover:bg-accent h-10 px-4"
+            >
+                Previous
+            </a>
+            {% endif %}
+
+            {% for p in results.page_range %}
+            <a
+                href="/search?q={{ results.query }}&search_type={{ results.search_type }}&board_id={{ results.board_id or '' }}&page={{ p }}"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none h-10 w-10 {% if p == results.page %}bg-primary text-primary-foreground{% else %}border border-input hover:bg-accent{% endif %}"
+            >
+                {{ p }}
+            </a>
+            {% endfor %}
+
+            {% if results.has_next %}
+            <a
+                href="/search?q={{ results.query }}&search_type={{ results.search_type }}&board_id={{ results.board_id or '' }}&page={{ results.page + 1 }}"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none border border-input hover:bg-accent h-10 px-4"
+            >
+                Next
+            </a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-12 text-muted-foreground">
+            <p>No results found for your search.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% elif query %}
+    <div class="text-center py-12 text-muted-foreground">
+        <p>No results found for "<strong>{{ query }}</strong>".</p>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-muted-foreground">
+        <p>Enter a search term to find posts.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

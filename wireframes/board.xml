@@ -1,0 +1,38 @@
+<page path="/boards/{board_id}">
+    <header></header>
+    <title>{board_name}</title>
+    <description>{board_description}</description>
+    
+    <actions>
+        <button href="/boards/{board_id}/posts/create">글쓰기</button>
+    </actions>
+    
+    <posts>
+        <table>
+            <thead>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>조회수</th>
+            </thead>
+            <tbody>
+                <tr href="/posts/{post_id}">
+                    <td>{번호}</td>
+                    <td>{제목}</td>
+                    <td>{작성자}</td>
+                    <td>{작성일}</td>
+                    <td>{조회수}</td>
+                </tr>
+            </tbody>
+        </table>
+    </posts>
+    
+    <pagination>
+        <prev>이전</prev>
+        <numbers>1 2 3 4 5</numbers>
+        <next>다음</next>
+    </pagination>
+    
+    <footer></footer>
+</page>

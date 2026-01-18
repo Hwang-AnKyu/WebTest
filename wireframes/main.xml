@@ -1,0 +1,21 @@
+<page path="/">
+    <header></header>
+    <hero>
+    아이컴(AICOM) 커뮤니티 서비스에<br> 
+    오신 것을 환영합니다
+    </hero>
+    <boards>
+        <left>
+            <items>게시판 목록</items>
+        </left>
+        <center>
+            <right><button>글쓰기</button></right>
+            <items>선택한 게시판 글목록</items>
+            <item>선택한 게시판 페이지네이션</item>
+        </center>
+        <right>
+            <item>검색</item>
+        </right>
+    </boards>
+    <footer></footer>
+</page>
