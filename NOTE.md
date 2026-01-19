@@ -388,6 +388,7 @@
 ### Supabase single() 메서드 예외 처리
 1. **문제**
    - `single()` 메서드는 결과가 없을 때 `APIError` (PGRST116) 예외 발생
+   - 잘못된 UUID 형식일 때 `APIError` (22P02) 예외 발생
    - 기존 코드에서 500 Internal Server Error 반환
 
 2. **해결**
@@ -397,8 +398,15 @@
    try:
        response = supabase.table("posts").select("*").eq("id", post_id).single().execute()
    except APIError as e:
-       if "PGRST116" in str(e) or "0 rows" in str(e):
+       error_str = str(e)
+       # 결과 없음 (PGRST116)
+       if "PGRST116" in error_str or "0 rows" in error_str:
+           raise HTTPException(status_code=404, detail="Post not found")
+       # 잘못된 UUID 형식 (22P02)
+       if "22P02" in error_str or "invalid input syntax for type uuid" in error_str:
            raise HTTPException(status_code=404, detail="Post not found")
        raise
    ```
    - `APIError`를 명시적으로 처리하여 404 반환
+   - PGRST116: 결과가 0개일 때
+   - 22P02: UUID 형식이 잘못되었을 때

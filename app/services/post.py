@@ -122,7 +122,14 @@ class PostService:
             raise
         except APIError as e:
             # Handle case when post is not found (single() returns no rows)
-            if "PGRST116" in str(e) or "0 rows" in str(e):
+            # or invalid UUID format (22P02 error)
+            error_str = str(e)
+            if "PGRST116" in error_str or "0 rows" in error_str:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Post not found"
+                )
+            if "22P02" in error_str or "invalid input syntax for type uuid" in error_str:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Post not found"
