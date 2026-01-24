@@ -4,8 +4,8 @@
 
 ### 관리자 계정
 ```
-이메일: [REMOVED]
-비밀번호: [REMOVED]
+이메일: onlycpp@naver.com
+비밀번호: admin123
 사용자명: admin
 권한: is_admin = true
 설명: 초기 관리자 계정 (자동 생성됨)

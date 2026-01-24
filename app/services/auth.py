@@ -12,7 +12,8 @@ from app.services.utils import sanitize_text
 logger = logging.getLogger(__name__)
 
 JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
-ALGORITHM = "HS256"
+# Supabase uses both HS256 and ES256 depending on configuration
+ALGORITHMS = ["HS256", "ES256"]
 
 
 class AuthService:
@@ -129,7 +130,7 @@ class AuthService:
             return None
 
         try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM], audience="authenticated")
+            payload = jwt.decode(token, JWT_SECRET, algorithms=ALGORITHMS, audience="authenticated")
             user_id = payload.get("sub")
             if not user_id:
                 return None
