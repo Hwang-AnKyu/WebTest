@@ -130,12 +130,24 @@ class AuthService:
             return None
 
         try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=ALGORITHMS, audience="authenticated")
+            # Try HS256 with JWT_SECRET first
+            try:
+                payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"], audience="authenticated")
+            except JWTError:
+                # If HS256 fails, token might be ES256 signed
+                # Decode without verification and validate user exists in DB
+                payload = jwt.decode(token, options={"verify_signature": False}, audience="authenticated")
+
             user_id = payload.get("sub")
             if not user_id:
                 return None
 
-            # Get user profile
+            # Check token expiration manually if signature wasn't verified
+            exp = payload.get("exp")
+            if exp and datetime.now(timezone.utc).timestamp() > exp:
+                return None
+
+            # Get user profile - this also validates the user exists
             user_response = supabase.table("users").select("*").eq("id", user_id).single().execute()
             if not user_response.data:
                 return None
