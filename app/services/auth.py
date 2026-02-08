@@ -12,8 +12,8 @@ from app.services.utils import sanitize_text
 logger = logging.getLogger(__name__)
 
 JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
-# Supabase uses both HS256 and ES256 depending on configuration
-ALGORITHMS = ["HS256", "ES256"]
+# Use HS256 algorithm with the JWT secret
+ALGORITHMS = ["HS256"]
 
 
 class AuthService:
