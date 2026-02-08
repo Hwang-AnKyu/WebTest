@@ -136,7 +136,8 @@ class AuthService:
             except JWTError:
                 # If HS256 fails, token might be ES256 signed
                 # Decode without verification and validate user exists in DB
-                payload = jwt.decode(token, options={"verify_signature": False}, audience="authenticated")
+                payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256", "ES256"],
+                                    options={"verify_signature": False}, audience="authenticated")
 
             user_id = payload.get("sub")
             if not user_id:
