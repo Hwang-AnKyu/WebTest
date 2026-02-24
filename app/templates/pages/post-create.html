@@ -29,7 +29,7 @@
     </div>
     {% endif %}
 
-    <form action="/boards/{{ board.id }}/posts/form" method="POST" id="post-form" class="space-y-6">
+    <form action="/boards/{{ board.id }}/posts/form" method="POST" id="post-form" class="space-y-6" hx-boost="false">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="content" id="content-input">
 
@@ -118,6 +118,7 @@
 
             quill.on('text-change', function() {
                 const content = quill.root.innerHTML;
+                document.getElementById('content-input').value = content;
                 const size = new Blob([content]).size;
                 const sizeText = size < 1024 ? size + ' B' :
                                 size < 1048576 ? (size / 1024).toFixed(1) + ' KB' :
